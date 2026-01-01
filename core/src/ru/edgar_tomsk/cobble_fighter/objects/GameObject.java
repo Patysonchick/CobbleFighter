@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class GameObject {
@@ -52,16 +52,16 @@ public class GameObject {
         def.fixedRotation = true;
         Body body = world.createBody(def);
 
-        CircleShape circleShape = new CircleShape();
-        circleShape.setRadius(Math.max(width, height) * SCALE / 2f);
+        PolygonShape polyShape = new PolygonShape();
+        polyShape.setAsBox(width * SCALE / 2f, height * SCALE / 2f);
 
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = circleShape;
+        fixtureDef.shape = polyShape;
         fixtureDef.density = 0.1f;
         fixtureDef.friction = 1f;
 
         body.createFixture(fixtureDef);
-        circleShape.dispose();
+        polyShape.dispose();
 
         body.setTransform(x * SCALE, y * SCALE, 0);
         return body;

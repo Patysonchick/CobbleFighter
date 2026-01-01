@@ -5,10 +5,12 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
@@ -31,6 +33,13 @@ public class GameScreen extends ScreenAdapter {
     boolean isAlive = true;
     public GameScreen(CobbleFighter CobbleFighter) {
         this.CobbleFighter = CobbleFighter;
+
+        Array<Body> bodies = new Array<>();
+        CobbleFighter.world.getBodies(bodies);
+        for (Body body : bodies) {
+            CobbleFighter.world.destroyBody(body);
+        }
+
         gameSession = new GameSession();
         cobbleArray = new ArrayList<>();
 
