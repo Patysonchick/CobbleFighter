@@ -21,6 +21,8 @@ public class CobbleObject extends GameObject {
         );
 
         body.setLinearVelocity(new Vector2(0, -GameSettings.COBBLE_VELOCITY));
+
+        body.setUserData("cobble");
     }
 
     public boolean isInFrame() {

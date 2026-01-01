@@ -5,6 +5,10 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 import java.util.ArrayList;
@@ -24,6 +28,7 @@ public class GameScreen extends ScreenAdapter {
     Texture backgroundTexture;
     ArrayList<CobbleObject> cobbleArray;
 
+    boolean isAlive = true;
     public GameScreen(CobbleFighter CobbleFighter) {
         this.CobbleFighter = CobbleFighter;
         gameSession = new GameSession();
@@ -38,6 +43,37 @@ public class GameScreen extends ScreenAdapter {
                 CobbleFighter.world
         );
 
+        CobbleFighter.world.setContactListener(new ContactListener() {
+            @Override
+            public void beginContact(Contact contact) {
+                Object dataA = contact.getFixtureA().getBody().getUserData();
+                Object dataB = contact.getFixtureB().getBody().getUserData();
+
+                if ((isGlove(dataA) && isCobble(dataB)) || (isGlove(dataB) && isCobble(dataA))) {
+                    isAlive = false;
+                }
+            }
+
+            private boolean isGlove(Object data) {
+                return "glove".equals(data);
+            }
+
+            private boolean isCobble(Object data) {
+                return "cobble".equals(data);
+            }
+
+            @Override
+            public void endContact(Contact contact) {
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+            }
+        });
     }
 
     @Override
@@ -47,6 +83,11 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+        if (!isAlive) {
+            CobbleFighter.setScreen(new RestartScreen(CobbleFighter));
+            dispose();
+            return;
+        }
 
         CobbleFighter.stepWorld();
         handleInput();
@@ -59,9 +100,7 @@ public class GameScreen extends ScreenAdapter {
             );
             cobbleArray.add(cobbleObject);
         }
-
         updateCobble();
-
         draw();
     }
 

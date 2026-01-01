@@ -12,6 +12,8 @@ public class GloveObject extends GameObject {
     public GloveObject(int x, int y, int width, int height, String texturePath, World world) {
         super(texturePath, x, y, width, height, world);
         body.setLinearDamping(10);
+
+        body.setUserData("glove");
     }
 
     public void move(Vector3 vector3) {
