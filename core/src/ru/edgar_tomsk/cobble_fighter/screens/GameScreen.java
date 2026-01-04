@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -28,12 +29,18 @@ public class GameScreen extends ScreenAdapter {
     CobbleFighter CobbleFighter;
     GameSession gameSession;
     GloveObject gloveObject;
+
     Texture backgroundTexture;
     Texture cobbleTexture;
     Texture gloveTexture;
+    Texture pauseButtonTexture;
+
     ArrayList<CobbleObject> cobbleArray;
+
     Music backgroundMusic;
     Sound hitSound;
+
+    Rectangle pauseButtonRect;
 
     boolean isAlive = true;
     public GameScreen(CobbleFighter CobbleFighter) {
@@ -51,6 +58,15 @@ public class GameScreen extends ScreenAdapter {
         backgroundTexture = new Texture(GameResources.BACKGROUND_IMG_PATH);
         cobbleTexture = new Texture(GameResources.COBBLE_IMG_PATH);
         gloveTexture = new Texture(GameResources.GLOVE_IMG_PATH);
+        pauseButtonTexture = new Texture(GameResources.BUTTON_PAUSE_IMG_PATH);
+
+        int buttonSize = 80;
+        pauseButtonRect = new Rectangle(
+                GameSettings.SCREEN_WIDTH - buttonSize - 20,
+                GameSettings.SCREEN_HEIGHT - buttonSize - 20,
+                buttonSize,
+                buttonSize
+        );
 
         gloveObject = new GloveObject(
                 GameSettings.SCREEN_WIDTH / 2, 150,
@@ -107,6 +123,13 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+        handleInput();
+
+        if (gameSession.state == GameSession.GameState.PAUSED) {
+            draw();
+            return;
+        }
+
         if (!isAlive) {
             CobbleFighter.setScreen(new RestartScreen(CobbleFighter));
             dispose();
@@ -114,7 +137,6 @@ public class GameScreen extends ScreenAdapter {
         }
 
         CobbleFighter.stepWorld();
-        handleInput();
 
         if (gameSession.shouldSpawnCobble()) {
             CobbleObject cobbleObject = new CobbleObject(
@@ -125,6 +147,7 @@ public class GameScreen extends ScreenAdapter {
             cobbleArray.add(cobbleObject);
         }
         updateCobble();
+
         draw();
     }
 
@@ -133,15 +156,34 @@ public class GameScreen extends ScreenAdapter {
         if (cobbleTexture != null) cobbleTexture.dispose();
         if (gloveTexture != null) gloveTexture.dispose();
         if (backgroundTexture != null) backgroundTexture.dispose();
+        if (pauseButtonTexture != null) pauseButtonTexture.dispose();
 
         if (backgroundMusic != null) backgroundMusic.dispose();
         if (hitSound != null) hitSound.dispose();
     }
 
     private void handleInput() {
-        if (Gdx.input.isTouched()) {
+        if (Gdx.input.justTouched()) {
             CobbleFighter.touch = CobbleFighter.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-            gloveObject.move(CobbleFighter.touch);
+
+            if (pauseButtonRect.contains(CobbleFighter.touch.x, CobbleFighter.touch.y)) {
+                if (gameSession.state == GameSession.GameState.PAUSED) {
+                    gameSession.state = GameSession.GameState.PLAYING;
+                    backgroundMusic.play();
+                } else {
+                    gameSession.state = GameSession.GameState.PAUSED;
+                    backgroundMusic.pause();
+                }
+                return;
+            }
+        }
+
+        if (gameSession.state == GameSession.GameState.PLAYING && Gdx.input.isTouched()) {
+            CobbleFighter.touch = CobbleFighter.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+
+            if (!pauseButtonRect.contains(CobbleFighter.touch.x, CobbleFighter.touch.y)) {
+                gloveObject.move(CobbleFighter.touch);
+            }
         }
     }
 
@@ -158,6 +200,12 @@ public class GameScreen extends ScreenAdapter {
         gloveObject.draw(CobbleFighter.batch);
 
         CobbleFighter.font.draw(CobbleFighter.batch, "Score: " + gameSession.score, 50, GameSettings.SCREEN_HEIGHT - 50);
+
+        CobbleFighter.batch.draw(pauseButtonTexture, pauseButtonRect.x, pauseButtonRect.y, pauseButtonRect.width, pauseButtonRect.height);
+
+        if (gameSession.state == GameSession.GameState.PAUSED) {
+            CobbleFighter.font.draw(CobbleFighter.batch, "PAUSED", GameSettings.SCREEN_WIDTH / 2f - 100, GameSettings.SCREEN_HEIGHT / 2f);
+        }
 
         CobbleFighter.batch.end();
     }

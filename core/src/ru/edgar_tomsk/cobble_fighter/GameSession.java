@@ -35,15 +35,11 @@ public class GameSession {
         return false;
     }
 
-    public void endGame() {
-        state = GameState.ENDED;
-    }
-
     private float getCobblePeriodCoolDown() {
         return (float) Math.exp(-0.001 * (TimeUtils.millis() - sessionStartTime + 1) / 1000);
     }
 
-    enum GameState {
-        PLAYING, ENDED, PAUSED
+    public enum GameState {
+        PLAYING, PAUSED
     }
 }

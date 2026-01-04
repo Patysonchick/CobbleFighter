@@ -5,6 +5,7 @@ public class GameResources {
     public static final String COBBLE_IMG_PATH = "textures/cobble.png";
     public static final String BACKGROUND_IMG_PATH = "textures/background.jpg";
     public static final String BUTTON_BG_IMG_PATH = "textures/button_bg.png";
+    public static final String BUTTON_PAUSE_IMG_PATH = "textures/button_pause.png";
 
     public static final String BACKGROUND_MUSIC_PATH = "music/background.mp3";
     public static final String HIT_SOUND_PATH = "music/hit.mp3";
