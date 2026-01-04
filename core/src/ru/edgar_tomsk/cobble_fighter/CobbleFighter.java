@@ -46,6 +46,7 @@ public class CobbleFighter extends Game {
     @Override
     public void dispose() {
         batch.dispose();
+        if (world != null) world.dispose();
         if (font != null) font.dispose();
     }
 

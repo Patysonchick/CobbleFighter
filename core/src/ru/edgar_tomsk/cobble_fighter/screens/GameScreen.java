@@ -156,6 +156,9 @@ public class GameScreen extends ScreenAdapter {
 
         for (CobbleObject cobble : cobbleArray) cobble.draw(CobbleFighter.batch);
         gloveObject.draw(CobbleFighter.batch);
+
+        CobbleFighter.font.draw(CobbleFighter.batch, "Score: " + gameSession.score, 50, GameSettings.SCREEN_HEIGHT - 50);
+
         CobbleFighter.batch.end();
     }
 
@@ -164,6 +167,8 @@ public class GameScreen extends ScreenAdapter {
             if (!cobbleArray.get(i).isInFrame()) {
                 CobbleFighter.world.destroyBody(cobbleArray.get(i).body);
                 cobbleArray.remove(i--);
+
+                gameSession.score++;
             }
         }
     }

@@ -3,9 +3,12 @@ package ru.edgar_tomsk.cobble_fighter;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class GameSession {
+    public int score;
 
     long nextCobbleSpawnTime;
     long sessionStartTime;
+    public GameState state;
+    long startTime;
 
     public GameSession() {
     }
@@ -14,9 +17,16 @@ public class GameSession {
         sessionStartTime = TimeUtils.millis();
         nextCobbleSpawnTime = sessionStartTime + (long) (GameSettings.STARTING_COBBLE_APPEARANCE_COOL_DOWN
                 * getCobblePeriodCoolDown());
+
+        state = GameState.PLAYING;
+        startTime = TimeUtils.millis();
+
+        score = 0;
     }
 
     public boolean shouldSpawnCobble() {
+        if (state != GameState.PLAYING) return false;
+
         if (nextCobbleSpawnTime <= TimeUtils.millis()) {
             nextCobbleSpawnTime = TimeUtils.millis() + (long) (GameSettings.STARTING_COBBLE_APPEARANCE_COOL_DOWN
                     * getCobblePeriodCoolDown());
@@ -25,7 +35,15 @@ public class GameSession {
         return false;
     }
 
+    public void endGame() {
+        state = GameState.ENDED;
+    }
+
     private float getCobblePeriodCoolDown() {
         return (float) Math.exp(-0.001 * (TimeUtils.millis() - sessionStartTime + 1) / 1000);
+    }
+
+    enum GameState {
+        PLAYING, ENDED, PAUSED
     }
 }
