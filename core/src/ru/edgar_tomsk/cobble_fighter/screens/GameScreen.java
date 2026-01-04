@@ -2,6 +2,8 @@ package ru.edgar_tomsk.cobble_fighter.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector3;
@@ -23,12 +25,15 @@ import ru.edgar_tomsk.cobble_fighter.objects.CobbleObject;
 import ru.edgar_tomsk.cobble_fighter.objects.GloveObject;
 
 public class GameScreen extends ScreenAdapter {
-
     CobbleFighter CobbleFighter;
     GameSession gameSession;
     GloveObject gloveObject;
     Texture backgroundTexture;
+    Texture cobbleTexture;
+    Texture gloveTexture;
     ArrayList<CobbleObject> cobbleArray;
+    Music backgroundMusic;
+    Sound hitSound;
 
     boolean isAlive = true;
     public GameScreen(CobbleFighter CobbleFighter) {
@@ -44,6 +49,8 @@ public class GameScreen extends ScreenAdapter {
         cobbleArray = new ArrayList<>();
 
         backgroundTexture = new Texture(GameResources.BACKGROUND_IMG_PATH);
+        cobbleTexture = new Texture(GameResources.COBBLE_IMG_PATH);
+        gloveTexture = new Texture(GameResources.GLOVE_IMG_PATH);
 
         gloveObject = new GloveObject(
                 GameSettings.SCREEN_WIDTH / 2, 150,
@@ -52,6 +59,13 @@ public class GameScreen extends ScreenAdapter {
                 CobbleFighter.world
         );
 
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal(GameResources.BACKGROUND_MUSIC_PATH));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.5f);
+        backgroundMusic.play();
+
+        hitSound = Gdx.audio.newSound(Gdx.files.internal(GameResources.HIT_SOUND_PATH));
+
         CobbleFighter.world.setContactListener(new ContactListener() {
             @Override
             public void beginContact(Contact contact) {
@@ -59,6 +73,7 @@ public class GameScreen extends ScreenAdapter {
                 Object dataB = contact.getFixtureB().getBody().getUserData();
 
                 if ((isGlove(dataA) && isCobble(dataB)) || (isGlove(dataB) && isCobble(dataA))) {
+                    hitSound.play();
                     isAlive = false;
                 }
             }
@@ -111,6 +126,16 @@ public class GameScreen extends ScreenAdapter {
         }
         updateCobble();
         draw();
+    }
+
+    @Override
+    public void dispose() {
+        if (cobbleTexture != null) cobbleTexture.dispose();
+        if (gloveTexture != null) gloveTexture.dispose();
+        if (backgroundTexture != null) backgroundTexture.dispose();
+
+        if (backgroundMusic != null) backgroundMusic.dispose();
+        if (hitSound != null) hitSound.dispose();
     }
 
     private void handleInput() {
